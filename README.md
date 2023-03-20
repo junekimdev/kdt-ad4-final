@@ -2,8 +2,9 @@
 
 ## Occasion
 
-Cars are equipped with cameras. We want to build ADAS.
-Use cameras on board to assist the human driver or to self-drive
+1. Cars are equipped with cameras.
+1. We want to build ADAS.
+1. Use cameras on board to assist the human driver or to self-drive
 
 ## Goals
 
