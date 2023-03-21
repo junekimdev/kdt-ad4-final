@@ -6,19 +6,36 @@
 1. We want to build ADAS.
 1. Use cameras on board to assist the human driver or to self-drive
 
+## User Stories
+
+- As an ADS, it needs to plan ahead so that it can move safely in RMC.
+  - As a planning engineer, I want to know where the free space is on the road.
+- As an ADS, it needs to keep lane so that it can drive safely.
+  - As a planning engineer, I want to know where the lane lines are.
+- As an ADS, it needs to change lane so that it can go to destination.
+  - As a planning engineer, I want to know where the lane lines are.
+
+> ### Terms
+>
+> - ADS: Automated Driving System
+> - RMC: Minimum Risk Condition
+
 ## Goals
 
 1. (Main) Detect where the free space is on the road _As Good As Tesla_
+   1. Color the free space of the road on the image by "**image segmentation techinque**"
 1. (Optional) Detect lane lines _As Good As Tesla_
+   1. Draw continous lines/curves which indicates lane lines
 
-## Obectives
+## Tasks
 
-1. Color the free space on the road by "**image segmentation techinque**"
 1. Research state-of-the-art method to detect the free space on the road
 1. Decide the proper image segmentation techinque for the project among many
 1. Use dataset obtained from real car
+1. Build ML model and train/eval/test
+1. Implement MLOps pipeline
 
-## Image Segmentation Technique Candidates
+## Candidates for Image Segmentation Technique
 
 1. W-net (Fully Unsupervised Image Segmentation)
 
@@ -34,7 +51,6 @@
 
 1. SCNN (Spacial CNN)
 
-   - [Angshuman Parashar, et al., SCNN: An Accelerator for Compressed-sparse Convolutional Neural Networks ()](https://arxiv.org/abs/1708.04485)
    - [Xingang Pan, et al., Spatial As Deep: Spatial CNN for Traffic Scene Understanding (2017)](https://arxiv.org/abs/1712.06080)
    - <https://github.com/XingangPan/SCNN>
 
