@@ -33,14 +33,27 @@
 1. Decide the proper image segmentation techinque for the project among many
 1. Use dataset obtained from real car
 1. Build ML model and train/eval/test
+   - Implement Custom Pytorch Dataset
+   - Implement Custom Pytorch Dataloader
+   - Implement Custom Pytorch module
+   - Get images from dataset
+   - Annotate date
+   - Augment dataset
+   - Implement unit tests
 1. Implement MLOps pipeline
+   - Carry out unit tests
+   - Turn Pytorch model to ONNX model
+   - Turn ONNX model to TensorRT model
+   - Implement integration test
+   - Carry out integration test
+   - Deploy to Jetson TX2
 
 ## Candidates for Image Segmentation Technique
 
 1. W-net (Fully Unsupervised Image Segmentation)
 
    - [Xide Xia and Brian Kulis, W-Net: A Deep Model for Fully Unsupervised Image Segmentation (2017)](https://arxiv.org/abs/1711.08506)
-   - <https://github.com/Andrew-booler/W-Net>
+   - Codes: <https://github.com/Andrew-booler/W-Net>
 
 1. FCN-8 (Fully Convolutional Networks)
 
@@ -52,7 +65,7 @@
 1. SCNN (Spacial CNN)
 
    - [Xingang Pan, et al., Spatial As Deep: Spatial CNN for Traffic Scene Understanding (2017)](https://arxiv.org/abs/1712.06080)
-   - <https://github.com/XingangPan/SCNN>
+   - Codes: <https://github.com/XingangPan/SCNN>
 
 ## Dataset Candidates
 
