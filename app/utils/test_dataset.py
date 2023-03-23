@@ -1,6 +1,6 @@
 import unittest
 import os
-from utils import dataset, dataloader
+from utils import dataset
 from PIL import Image
 import albumentations as A
 
@@ -8,9 +8,7 @@ TEST_IMAGE_FILENAME = "../test_image.jpg"
 
 
 def get_test_image_path():
-    path = os.path.abspath(__file__)
-    path = os.path.dirname(path)
-    return os.path.join(path, TEST_IMAGE_FILENAME)
+    return os.path.join(os.path.dirname(__file__), TEST_IMAGE_FILENAME)
 
 
 class DatasetPilTestCase(unittest.TestCase):
