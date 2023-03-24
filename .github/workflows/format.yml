@@ -1,12 +1,6 @@
-name: CI
+name: Linting and Formatting
 
-on:
-  push:
-    tags:
-      - "v*"
-  pull_request:
-    branches:
-      - master
+on: [push]
 
 env:
   REGISTRY: ghcr.io
@@ -33,11 +27,10 @@ jobs:
           python3 -c "import sys; print(sys.version)"
       - name: Install dependencies
         run: |
-          python3 -m pip install -U pip setuptools wheel
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python3 -m pip install -U pip setuptools wheel autopep8
           pip list
       - name: Lint python files
         run: |
           echo "Running autopep8..."
           find . -name '*.py' -exec autopep8 --in-place '{}' \;
-          echo "Linting is done"
+          echo "Linting and formatting is complete"

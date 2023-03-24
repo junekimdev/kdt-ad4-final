@@ -1,0 +1,43 @@
+name: Unittest
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  REPO_NAME: ${{ github.repository }}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  Unittest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pip" # caching pip dependencies
+      - name: Check Python version
+        run: |
+          python3 -c "import sys; print(sys.version)"
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -U pip setuptools wheel
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip list
+      - name: Lint python files
+        run: |
+          echo "Running autopep8..."
+          find . -name '*.py' -exec autopep8 --in-place '{}' \;
+          echo "Linting is done"
