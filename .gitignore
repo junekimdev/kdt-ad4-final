@@ -1,0 +1,28 @@
+# dev environments
+.venv/
+.env*
+*.env
+.vscode/
+
+# testing
+coverage/
+
+# Dataset
+dataset/
+!*/test/dataset/
+*.pth
+
+# Logs
+logs
+*.log
+
+# production
+build/
+release/
+dist/
+dll/
+
+# misc
+.DS_Store
+placeholder_*
+__pycache__/
