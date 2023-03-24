@@ -21,7 +21,7 @@ class MyTransform:
                 A.RandomSunFlare(),
                 A.RandomSnow(),
                 A.RandomContrast(),
-                A.RandomBrightness(),
+                A.RandomBrightnessContrast(),
             ], p=.2),
             A.GaussianBlur(p=.7),
             A.GaussNoise(),
