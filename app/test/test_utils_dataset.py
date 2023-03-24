@@ -1,54 +1,46 @@
-import unittest
+import pytest
 import os
 import torch
-from utils import dataset
-from utils.augment import MyTransform
+from app.utils.dataset import DatasetAugPil, DatasetAugPilLabel
+from app.utils.augment import MyTransform
 from app.config import Mode
 
-TEST_IMAGE_FILENAME = "./dataset/train/images/placekitten_640x360_0.jpg"
-TEST_FILE_PATHS = [os.path.join(os.path.dirname(__file__), TEST_IMAGE_FILENAME),
-                   'filename1', 'filename2', 'filename3']
-TEST_LABELS = ["label1", "label2", "label3", "label4"]
+
+@pytest.fixture
+def image_filename():
+    return "./dataset/train/images/placekitten_640x360_0.jpg"
 
 
-class DatasetAugPilTestCase(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
-        self.file_paths = TEST_FILE_PATHS
-        self.tf = MyTransform(Mode.TRAIN).get()
-        self.instance = dataset.DatasetAugPil(self.file_paths, self.tf)
-
-    def test_1_init(self):
-        self.assertCountEqual(self.file_paths, self.instance.file_paths)
-
-    def test_2_len(self):
-        self.assertEqual(len(self.file_paths), len(self.instance))
-
-    def test_3_get_item(self):
-        self.assertIsInstance(self.instance.__getitem__(0), torch.Tensor)
+@pytest.fixture
+def file_paths(image_filename):
+    return [os.path.join(os.path.dirname(__file__), image_filename),
+            'filename1', 'filename2', 'filename3']
 
 
-class DatasetAugPilLabelTestCase(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
-        self.file_paths = TEST_FILE_PATHS
-        self.labels = TEST_LABELS
-        self.tf = MyTransform(Mode.TRAIN).get()
-        self.instance = dataset.DatasetAugPilLabel(
-            self.file_paths, self.labels, self.tf)
-
-    def test_1_init(self):
-        self.assertCountEqual(self.file_paths, self.instance.file_paths)
-        self.assertCountEqual(self.labels, self.instance.labels)
-
-    def test_2_len(self):
-        self.assertEqual(len(self.file_paths), len(self.instance))
-
-    def test_3_get_item(self):
-        image, label = self.instance.__getitem__(0)
-        self.assertIsInstance(image, torch.Tensor)
-        self.assertIsInstance(label, str)
+@pytest.fixture
+def labels():
+    return ["label1", "label2", "label3", "label4"]
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture
+def tf():
+    return MyTransform(Mode.TRAIN).get()
+
+
+def test_DatasetAugPil(file_paths, tf):
+    instance = DatasetAugPil(file_paths, tf)
+
+    assert len(instance.file_paths) == len(file_paths)
+    assert len(instance) == len(file_paths)
+    assert isinstance(instance.__getitem__(0), torch.Tensor)
+
+
+def test_DatasetAugPilLabel(file_paths, labels, tf):
+    instance = DatasetAugPilLabel(file_paths, labels, tf)
+    image, label = instance.__getitem__(0)
+
+    assert len(instance.file_paths) == len(file_paths)
+    assert len(instance.labels) == len(labels)
+    assert len(instance) == len(file_paths)
+    assert isinstance(image, torch.Tensor)
+    assert isinstance(label, str)

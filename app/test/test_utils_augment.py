@@ -1,36 +1,31 @@
-import unittest
+import pytest
 import albumentations as A
-from utils.augment import MyTransform
+from app.utils.augment import MyTransform
 from app.config import Mode
 
 
-class MyTransformTestCase(unittest.TestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.tf_train = MyTransform(Mode.TRAIN)
-        self.tf_eval = MyTransform(Mode.EVAL)
-        self.tf_test = MyTransform(Mode.TEST)
+def test_tf_train():
+    tf = MyTransform(Mode.TRAIN)
 
-    def test_1_init(self):
-        self.assertIs(self.tf_train.mode, Mode.TRAIN)
-        self.assertIs(self.tf_eval.mode, Mode.EVAL)
-        self.assertIs(self.tf_test.mode, Mode.TEST)
-
-    def test_2_get_tf_train(self):
-        self.assertIsInstance(self.tf_train._get_tf_train(), A.Compose)
-        self.assertIsInstance(self.tf_eval._get_tf_train(), A.Compose)
-        self.assertIsInstance(self.tf_test._get_tf_train(), A.Compose)
-
-    def test_3_get_tf_eval(self):
-        self.assertIsInstance(self.tf_train._get_tf_eval(), A.Compose)
-        self.assertIsInstance(self.tf_eval._get_tf_eval(), A.Compose)
-        self.assertIsInstance(self.tf_test._get_tf_eval(), A.Compose)
-
-    def test_4_get(self):
-        self.assertIsInstance(self.tf_train.get(), A.Compose)
-        self.assertIsInstance(self.tf_eval.get(), A.Compose)
-        self.assertIsInstance(self.tf_test.get(), A.Compose)
+    assert tf.mode is Mode.TRAIN
+    assert isinstance(tf._get_tf_train(), A.Compose)
+    assert isinstance(tf._get_tf_eval(), A.Compose)
+    assert isinstance(tf.get(), A.Compose)
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_tf_eval():
+    tf = MyTransform(Mode.EVAL)
+
+    assert tf.mode is Mode.EVAL
+    assert isinstance(tf._get_tf_train(), A.Compose)
+    assert isinstance(tf._get_tf_eval(), A.Compose)
+    assert isinstance(tf.get(), A.Compose)
+
+
+def test_tf_test():
+    tf = MyTransform(Mode.TEST)
+
+    assert tf.mode is Mode.TEST
+    assert isinstance(tf._get_tf_train(), A.Compose)
+    assert isinstance(tf._get_tf_eval(), A.Compose)
+    assert isinstance(tf.get(), A.Compose)
