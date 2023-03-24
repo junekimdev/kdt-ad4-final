@@ -24,4 +24,8 @@ class Mode(Enum):
 
 class Config:
     def __init__(self) -> None:
+        self.image_dir_name = "images"
+        self.image_list_txt_name = "all.txt"
+        self.batch_train = 16
+        self.batch_eval = 1
         self.input = Size(3, 224, 224)
