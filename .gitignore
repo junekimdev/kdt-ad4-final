@@ -1,5 +1,6 @@
 # dev environments
 .venv/
+open_venv*
 .env*
 *.env
 .vscode/
