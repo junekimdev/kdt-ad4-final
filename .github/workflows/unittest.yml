@@ -41,3 +41,6 @@ jobs:
           echo "Running autopep8..."
           find . -name '*.py' -exec autopep8 --in-place '{}' \;
           echo "Linting is done"
+      - name: Unittest
+        run: |
+          pytest
