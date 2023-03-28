@@ -35,7 +35,8 @@ class Config:
         self.conv_kernel = 3
         self.conv_stride = 1
         self.conv_padding = self._get_padding(self.conv_kernel)
-        self.conv_bias = True
+        self.conv_bias = False
+        self.conv_dropout_p = .1
         self.pool_kernel = 2
         self.pool_stride = 2
         self.upsample_kernel = 2
