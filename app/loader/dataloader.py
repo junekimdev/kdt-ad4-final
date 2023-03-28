@@ -1,8 +1,8 @@
 import os
 import multiprocessing
 from torch.utils.data import DataLoader
-from app.utils.dataset import DatasetAugPil
-from app.utils.augment import MyTransform
+from app.loader.dataset import DatasetAugPil
+from app.loader.augment import MyTransform
 from app.config import Config, Mode
 config = Config()
 

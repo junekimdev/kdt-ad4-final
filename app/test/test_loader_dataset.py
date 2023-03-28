@@ -1,8 +1,8 @@
 import pytest
 import os
 import torch
-from app.utils.dataset import DatasetAugPil, DatasetAugPilLabel
-from app.utils.augment import MyTransform
+from app.loader.dataset import DatasetAugPil, DatasetAugPilLabel
+from app.loader.augment import MyTransform
 from app.config import Mode
 
 

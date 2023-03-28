@@ -3,8 +3,8 @@ import os
 import torch
 from torch.utils.data import DataLoader
 import albumentations as A
-from app.utils.dataloader import MyLoader
-from app.utils.dataset import DatasetAugPil
+from app.loader.dataloader import MyLoader
+from app.loader.dataset import DatasetAugPil
 from app.config import Mode, Config
 config = Config()
 

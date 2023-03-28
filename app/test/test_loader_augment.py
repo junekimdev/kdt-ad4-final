@@ -1,6 +1,6 @@
 import pytest
 import albumentations as A
-from app.utils.augment import MyTransform
+from app.loader.augment import MyTransform
 from app.config import Mode
 
 
