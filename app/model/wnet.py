@@ -11,8 +11,9 @@ class Wnet(nn.Module):
         self.softmax = nn.Softmax(dim=1)  # dim=1 is the channel
         self.decoder = Unet(num_segment, out_channels)
 
-    def forward(self, x):
+    def forward(self, x, *, run_decoder=True):
         x = self.encoder(x)
         x = self.softmax(x)
-        x = self.decoder(x)
+        if run_decoder:
+            x = self.decoder(x)
         return x
