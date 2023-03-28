@@ -41,6 +41,9 @@ class Config:
         self.pool_stride = 2
         self.upsample_kernel = 2
         self.upsample_stride = 2
+        self.lr_init = 0.05
+        self.lr_decay_step = 100
+        self.lr_decay_amount = 0.1
 
     def _get_padding(self, kernel: int) -> int:
         assert kernel % 2, "kernel is not an odd number"
