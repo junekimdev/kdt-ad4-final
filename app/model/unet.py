@@ -13,13 +13,13 @@ class EncoderBlockReg(nn.Module):
                  kernel_size=config.pool_kernel, stride=config.pool_stride):
         super().__init__()
 
-        self.cov1 = RegularConv(in_channels, out_channels)
-        self.cov2 = RegularConv(out_channels, out_channels)
+        self.conv1 = RegularConv(in_channels, out_channels)
+        self.conv2 = RegularConv(out_channels, out_channels)
         self.pool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
 
     def forward(self, x):
-        x = self.cov1(x)
-        x = self.cov2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         p = self.pool(x)
         return x, p
 
@@ -32,13 +32,13 @@ class EncoderBlockSep(nn.Module):
                  kernel_size=config.pool_kernel, stride=config.pool_stride):
         super().__init__()
 
-        self.cov1 = SeparableConv(in_channels, out_channels)
-        self.cov2 = SeparableConv(out_channels, out_channels)
+        self.conv1 = SeparableConv(in_channels, out_channels)
+        self.conv2 = SeparableConv(out_channels, out_channels)
         self.pool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
 
     def forward(self, x):
-        x = self.cov1(x)
-        x = self.cov2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         p = self.pool(x)
         return x, p
 
@@ -54,16 +54,16 @@ class DecoderBlockReg(nn.Module):
         self.upsample = nn.ConvTranspose2d(
             in_channels, out_channels, kernel_size=kernel_size, stride=stride)
         # in_channels == out_channels*2
-        self.cov1 = SeparableConv(in_channels, out_channels)
-        self.cov2 = RegularConv(out_channels, out_channels)
+        self.conv1 = SeparableConv(in_channels, out_channels)
+        self.conv2 = RegularConv(out_channels, out_channels)
 
         nn.init.xavier_uniform_(self.upsample.weight)
 
     def forward(self, x, skip):
         x = self.upsample(x)
         x = torch.concat([x, skip], dim=1)
-        x = self.cov1(x)
-        x = self.cov2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         return x
 
 
@@ -78,16 +78,16 @@ class DecoderBlockSep(nn.Module):
         self.upsample = nn.ConvTranspose2d(in_channels, out_channels,
                                            kernel_size=kernel_size, stride=stride)
         # in_channels == out_channels*2
-        self.cov1 = SeparableConv(in_channels, out_channels)
-        self.cov2 = SeparableConv(out_channels, out_channels)
+        self.conv1 = SeparableConv(in_channels, out_channels)
+        self.conv2 = SeparableConv(out_channels, out_channels)
 
         nn.init.xavier_uniform_(self.upsample.weight)
 
     def forward(self, x, skip):
         x = self.upsample(x)
         x = torch.concat([x, skip], dim=1)
-        x = self.cov1(x)
-        x = self.cov2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         return x
 
 
@@ -99,7 +99,7 @@ class Unet(nn.Module):
         self.ec3 = EncoderBlockSep(init_feature*2, init_feature*4)
         self.ec4 = EncoderBlockSep(init_feature*4, init_feature*8)
 
-        self.br = EncoderBlockSep(init_feature*8, init_feature*16)
+        self.neck = EncoderBlockSep(init_feature*8, init_feature*16)
 
         self.dc4 = DecoderBlockSep(init_feature*16, init_feature*8)
         self.dc3 = DecoderBlockSep(init_feature*8, init_feature*4)
@@ -115,7 +115,7 @@ class Unet(nn.Module):
         skip2, x = self.ec2(x)
         skip3, x = self.ec3(x)
         skip4, x = self.ec4(x)
-        x, _ = self.br(x)
+        x, _ = self.neck(x)
         x = self.dc4(x, skip4)
         x = self.dc3(x, skip3)
         x = self.dc2(x, skip2)
