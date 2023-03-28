@@ -57,6 +57,8 @@ class DecoderBlockReg(nn.Module):
         self.cov1 = SeparableConv(in_channels, out_channels)
         self.cov2 = RegularConv(out_channels, out_channels)
 
+        nn.init.xavier_uniform_(self.upsample.weight)
+
     def forward(self, x, skip):
         x = self.upsample(x)
         x = torch.concat([x, skip], dim=1)
@@ -78,6 +80,8 @@ class DecoderBlockSep(nn.Module):
         # in_channels == out_channels*2
         self.cov1 = SeparableConv(in_channels, out_channels)
         self.cov2 = SeparableConv(out_channels, out_channels)
+
+        nn.init.xavier_uniform_(self.upsample.weight)
 
     def forward(self, x, skip):
         x = self.upsample(x)
@@ -103,6 +107,8 @@ class Unet(nn.Module):
         self.dc1 = DecoderBlockReg(init_feature*2, init_feature)
 
         self.conv = nn.Conv2d(init_feature, out_channels, kernel_size=1)
+
+        nn.init.xavier_uniform_(self.conv.weight)
 
     def forward(self, x):
         skip1, x = self.ec1(x)

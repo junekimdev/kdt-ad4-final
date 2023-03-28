@@ -17,6 +17,8 @@ class RegularConv(nn.Module):
         self.dropout = nn.Dropout(p=dropout_p)
         self.bn = nn.BatchNorm2d(out_channels)
 
+        nn.init.xavier_uniform_(self.conv.weight)
+
     def forward(self, x):
         x = self.conv(x)
         x = self.relu(x)
@@ -47,6 +49,9 @@ class SeparableConv(nn.Module):
                                    kernel_size=1, stride=1, padding=0, bias=bias)
         self.dropout = nn.Dropout(p=dropout_p)
         self.bn = nn.BatchNorm2d(out_channels)
+
+        nn.init.xavier_uniform_(self.depthwise.weight)
+        nn.init.xavier_uniform_(self.pointwise.weight)
 
     def forward(self, x):
         x = self.depthwise(x)
