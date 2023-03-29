@@ -2,10 +2,6 @@ name: Linting and Formatting
 
 on: [push]
 
-env:
-  REGISTRY: ghcr.io
-  REPO_NAME: ${{ github.repository }}
-
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
