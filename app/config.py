@@ -6,6 +6,7 @@ class Size:
         self.c = c
         self.h = h
         self.w = w
+        self.shape = (c, h, w)
 
 
 class Mode(Enum):
