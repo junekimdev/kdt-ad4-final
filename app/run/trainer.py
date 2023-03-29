@@ -9,11 +9,12 @@ from PIL import Image
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.loss.soft_ncut import SoftNCutLoss
+from app.run.runner import Runnable
 from app.config import Config, Mode
 config = Config()
 
 
-class Trainer:
+class Trainer(Runnable):
     @classmethod
     def load(cls, checkpoint_path, dataset_root, output_dir):
         device = torch.device("cuda") \
@@ -66,22 +67,22 @@ class Trainer:
         summary(self.model, config.input.shape, config.batch_train)
         self.model.train()
         while True:
-            self.run_epoch()
+            self._run_epoch()
 
-    def run_epoch(self, start_at=time.time()):
+    def _run_epoch(self, start_at=time.time()):
         self.epoch += 1
         for batch in self.dataloader:
             if batch is None:  # Invalid batch
                 continue
-            self.run_iter(batch)
+            self._run_iter(batch)
 
         self.scheduler.step()
         self.writer.add_scalar("Time/epoch", time.time()-start_at, self.epoch)
 
         if not self.epoch % config.save_period_epoch:
-            self.save()
+            self._save()
 
-    def run_iter(self, batch, start_at=time.time()):
+    def _run_iter(self, batch, start_at=time.time()):
         self.iter += 1
         img = batch  # Unpack if batch has labels
         img = img.to(self.device)
@@ -102,15 +103,15 @@ class Trainer:
 
         # Output
         if not self.iter % config.output_period_iter:
-            self.write_iter(encoder_loss, decoder_loss, time.time()-start_at)
+            self._write_iter(encoder_loss, decoder_loss, time.time()-start_at)
 
-    def write_iter(self, encoder_loss, decoder_loss, time_spent):
+    def _write_iter(self, encoder_loss, decoder_loss, time_spent):
         self.writer.add_scalar("Loss/Encoder", encoder_loss.item(), self.iter)
         self.writer.add_scalar("Loss/Decoder", decoder_loss.item(), self.iter)
         self.writer.add_scalar("LR", self.scheduler.get_last_lr(), self.iter)
         self.writer.add_scalar("Time/Iter", time_spent, self.iter)
 
-    def save(self):
+    def _save(self):
         path = os.path.join(self.output_dir, f"model_epoch{self.epoch}.pth")
         save_dict = {"model": self.model.state_dict(),
                      "optimizer": self.optimizer.state_dict(),
