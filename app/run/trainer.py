@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 from PIL import Image
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
+from app.loss.soft_ncut import SoftNCutLoss
 from app.config import Config, Mode
 config = Config()
 
@@ -49,9 +50,9 @@ class Trainer:
         self.scheduler = optim.lr_scheduler.StepLR(
             self.optimizer, step_size=config.lr_decay_epoch, gamma=config.lr_decay_amount) \
             if scheduler is None else scheduler
-        # Negative Log Likelihood Loss
-        self.encoder_loss = nn.NLLLoss() if encoder_loss is None else encoder_loss
-        # Mean Squared Error Loss
+        # SoftNCutLoss derived from Negative Log Likelihood(NLL) Loss
+        self.encoder_loss = nn.SoftNCutLoss() if encoder_loss is None else encoder_loss
+        # Mean Squared Error(MSE) Loss
         self.decoder_loss = nn.MSELoss() if decoder_loss is None else decoder_loss
         self._send_to_device()
 
@@ -87,8 +88,7 @@ class Trainer:
         # Phase 1 - Encoder Only Feedback
         self.optimizer.zero_grad()
         encoder_res = self.model(img, run_decoder=False)
-        # TODO add target
-        encoder_loss = self.encoder_loss(encoder_res, target)
+        encoder_loss = self.encoder_loss(encoder_res, img)
         encoder_loss.backward()
         self.optimizer.step()
 
