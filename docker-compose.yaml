@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  app:
+    image: junekimdev/tensorboard:1.0-alpine
+    container_name: tensorboard
+    restart: unless-stopped
+    ports:
+      - 8888:8888
+    volumes:
+      - ./output:/data
