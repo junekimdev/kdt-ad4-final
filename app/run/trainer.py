@@ -51,7 +51,7 @@ class Trainer:
             self.optimizer, step_size=config.lr_decay_epoch, gamma=config.lr_decay_amount) \
             if scheduler is None else scheduler
         # SoftNCutLoss derived from Negative Log Likelihood(NLL) Loss
-        self.encoder_loss = nn.SoftNCutLoss() if encoder_loss is None else encoder_loss
+        self.encoder_loss = SoftNCutLoss() if encoder_loss is None else encoder_loss
         # Mean Squared Error(MSE) Loss
         self.decoder_loss = nn.MSELoss() if decoder_loss is None else decoder_loss
         self._send_to_device()
