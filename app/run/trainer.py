@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from torchsummary import summary
 from PIL import Image
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
@@ -62,7 +63,7 @@ class Trainer:
         self.decoder_loss.to(self.device)
 
     def run(self):
-        self.model.state_dict()
+        summary(self.model, config.input.shape, config.batch_train)
         self.model.train()
         while True:
             self.run_epoch()
