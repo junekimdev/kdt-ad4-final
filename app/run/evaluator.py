@@ -90,10 +90,11 @@ class Evaluator(Runnable):
 
     def _save_image(self, inference: torch.Tensor):
         # change shape to h,w,3
-        img_hwc = inference.squeeze(0).transpose(1, 2, 0)
+        img_hwc = inference.squeeze(0).permute(1, 2, 0)
         assert img_hwc.shape[-1] == 3, "Tensor's channel is not 3"
 
-        img_np = np.array(img_hwc, dtype=np.uint8)  # convert to numpy array
+        # convert to numpy array
+        img_np = np.array(img_hwc.tolist(), dtype=np.uint8)
         img_res = Image.fromarray(img_np)  # convert to pillow image
 
         dname = os.path.join(self.output_dir, "images")
