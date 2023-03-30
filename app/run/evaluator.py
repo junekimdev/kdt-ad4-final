@@ -1,13 +1,12 @@
 import time
 import os
-import gc
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from torchsummary import summary
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.run.runner import Runnable
-from app.utils.tools import save_image, save_clusters
+from app.utils.tools import save_image
 from app.config import Config, Mode
 config = Config()
 
@@ -25,12 +24,11 @@ class Evaluator(Runnable):
         self._send_to_device()
         return self
 
-    def __init__(self, dataset_root: str, output_dir: str, model=None, loader=None,  K=config.K):
+    def __init__(self, dataset_root: str, output_dir: str, model=None, loader=None):
         self.device = torch.device("cuda") \
             if torch.cuda.is_available() else torch.device("cpu")
         print(f"Evaluator uses [{self.device}]")
 
-        self.K = K
         self.dataset_root = os.path.abspath(dataset_root)
         self.output_dir = os.path.abspath(output_dir)
         self.writer = SummaryWriter(self.output_dir)
@@ -56,18 +54,8 @@ class Evaluator(Runnable):
                 continue
 
             t = time.time()
-            # Encoder
-            inference = self._infer(batch, run_decoder=False)
-            filename = f"eval-{t}-u1"
-            save_clusters(inference, self.K, self.output_dir, filename)
-
-            del inference
-            gc.collect()
-            torch.cuda.empty_cache()
-
-            # Encoder+Decoder
             inference = self._infer(batch, run_decoder=True)
-            filename = f"eval-{t}-u2"
+            filename = f"eval-{t}"
             save_image(inference, self.output_dir, filename)
 
         dt = time.time()-start_at

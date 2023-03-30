@@ -2,8 +2,6 @@ import pytest
 import os
 import torch
 from app.utils import tools
-from app.config import Config
-config = Config()
 
 TEST_BATCH = 1
 TEST_CHAN = 3
@@ -31,12 +29,5 @@ def input_tensor():
 def test_save_image(input_tensor, output_dir):
     try:
         tools.save_image(input_tensor, output_dir, TEST_NAME)
-    except Exception as e:
-        pytest.fail(str(e))
-
-
-def test_save_clusters(input_tensor, output_dir):
-    try:
-        tools.save_clusters(input_tensor, TEST_CHAN, output_dir, TEST_NAME)
     except Exception as e:
         pytest.fail(str(e))
