@@ -43,10 +43,10 @@ class Config:
         self.upsample_kernel = 2
         self.upsample_stride = 2
         self.lr_init = 0.05
-        self.lr_decay_epoch = 100
+        self.lr_decay_epoch = 10
         self.lr_decay_ratio = 0.5
         self.output_period_iter = 100
-        self.save_period_epoch = 50
+        self.save_period_epoch = 10
 
     def _get_padding(self, kernel: int) -> int:
         assert kernel % 2, "kernel is not an odd number"
