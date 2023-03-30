@@ -46,6 +46,27 @@ def save_image(inference: Tensor, output_dir: str, filename: str):
     except FileExistsError:
         pass
 
-    fname = os.path.join(dname, filename)
+    fname = os.path.join(dname, f"{filename}.jpg")
     img_res.save(fname)
     print(f"An image has been saved as {fname}")
+
+
+def save_clusters(inference: Tensor, k: int, output_dir: str, filename: str):
+    dname = os.path.join(output_dir, config.image_dir_name)
+    try:
+        os.makedirs(dname)
+    except FileExistsError:
+        pass
+
+    # change shape to h,w,3
+    img_k = inference.squeeze(0)
+
+    for i in range(k):
+
+        # convert to numpy array
+        img_np = np.array(img_k[i].tolist(), dtype=np.uint8)
+        img_res = Image.fromarray(img_np)  # convert to pillow image
+
+        fname = os.path.join(dname, f"{filename}-{i}.jpg")
+        img_res.save(fname)
+        print(f"An image has been saved as {fname}")

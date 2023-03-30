@@ -2,16 +2,23 @@ import pytest
 import os
 import torch
 from app.utils import tools
+from app.config import Config
+config = Config()
 
 TEST_BATCH = 1
 TEST_CHAN = 3
 TEST_SIZE = 224
-TEST_NAME = "test_image.jpg"
+TEST_NAME = "test_image"
 
 
 @pytest.fixture
 def output_dir():
-    return os.path.join(os.path.dirname(__file__), "output")
+    dname = os.path.join(os.path.dirname(__file__), "output")
+    yield dname
+    for rt, _, files in os.walk(dname):
+        for f in files:
+            fname = os.path.join(rt, f)
+            os.remove(fname)
 
 
 @pytest.fixture
@@ -26,8 +33,10 @@ def test_save_image(input_tensor, output_dir):
         tools.save_image(input_tensor, output_dir, TEST_NAME)
     except Exception as e:
         pytest.fail(str(e))
-    else:
-        for rt, _, files in os.walk(output_dir):
-            for f in files:
-                fname = os.path.join(rt, f)
-                os.remove(fname)
+
+
+def test_save_clusters(input_tensor, output_dir):
+    try:
+        tools.save_clusters(input_tensor, TEST_CHAN, output_dir, TEST_NAME)
+    except Exception as e:
+        pytest.fail(str(e))

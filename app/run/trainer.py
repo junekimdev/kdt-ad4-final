@@ -9,7 +9,7 @@ from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.loss.soft_ncut import SoftNCutLoss
 from app.run.runner import Runnable
-from app.utils.tools import save_image
+from app.utils.tools import save_image, save_clusters
 from app.config import Config, Mode
 config = Config()
 
@@ -32,10 +32,11 @@ class Trainer(Runnable):
         return self
 
     def __init__(self, dataset_root: str, output_dir: str,
-                 model=None, loader=None, optimizer=None, scheduler=None,
+                 model=None, loader=None, optimizer=None, scheduler=None, K=config.K,
                  encoder_loss=None, decoder_loss=None, epoch=0, iter=0):
         self.epoch = epoch
         self.iter = iter
+        self.K = K
         self.device = torch.device("cuda") \
             if torch.cuda.is_available() else torch.device("cpu")
         print(f"Trainer uses [{self.device}]")
@@ -151,13 +152,13 @@ class Trainer(Runnable):
             t = time.time()
             # Encoder
             inference = self._infer(batch, run_decoder=False)
-            filename = f"eval-{t}-1.jpg"
-            save_image(inference, self.output_dir, filename)
+            filename = f"eval-{t}-u1"
+            save_clusters(inference, self.K, self.output_dir, filename)
             infers.append(inference)
 
             # Encoder+Decoder
             inference = self._infer(batch, run_decoder=True)
-            filename = f"eval-{t}-2.jpg"
+            filename = f"eval-{t}-u2"
             save_image(inference, self.output_dir, filename)
             infers.append(inference)
 
