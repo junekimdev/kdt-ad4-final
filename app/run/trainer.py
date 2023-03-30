@@ -1,5 +1,6 @@
 import time
 import os
+import gc
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -145,7 +146,6 @@ class Trainer(Runnable):
 
         start_at = time.time()
         dataloader = MyLoader(Mode.EVAL, self.dataset_root).torch()
-        infers = []
         for batch in dataloader:
             if batch is None:  # Invalid batch
                 continue
@@ -155,17 +155,18 @@ class Trainer(Runnable):
             inference = self._infer(batch, run_decoder=False)
             filename = f"eval-{t}-u1"
             save_clusters(inference, self.K, self.output_dir, filename)
-            infers.append(inference)
+            inference = inference.permute(1, 0, 2, 3)
+            self.writer.add_images("Eval/Images", inference, time.time())
+
+            del inference
+            gc.collect()
+            torch.cuda.empty_cache()
 
             # Encoder+Decoder
             inference = self._infer(batch, run_decoder=True)
             filename = f"eval-{t}-u2"
             save_image(inference, self.output_dir, filename)
-            infers.append(inference)
-
-        # Output to tensorboard
-        stacked_infers = torch.stack(infers)
-        self.writer.add_images("Eval/Images", stacked_infers, self.epoch)
+            self.writer.add_image("Eval/Images", inference, time.time())
 
         dt = time.time()-start_at
         print(f"It took {dt:.3f} sec to evaluate")

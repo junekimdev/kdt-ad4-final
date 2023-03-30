@@ -1,5 +1,6 @@
 import time
 import os
+import gc
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from torchsummary import summary
@@ -59,6 +60,10 @@ class Evaluator(Runnable):
             inference = self._infer(batch, run_decoder=False)
             filename = f"eval-{t}-u1"
             save_clusters(inference, self.K, self.output_dir, filename)
+
+            del inference
+            gc.collect()
+            torch.cuda.empty_cache()
 
             # Encoder+Decoder
             inference = self._infer(batch, run_decoder=True)
