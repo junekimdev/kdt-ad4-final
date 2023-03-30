@@ -1,4 +1,5 @@
 from app.run.trainer import Trainer
+from app.run.evaluator import Evaluator
 from app.utils import tools
 
 
@@ -11,8 +12,11 @@ def main():
     elif args.mode == "train":
         runner = Trainer.load(
             args.checkpoint, args.dataset_root, args.output_dir)
+    elif args.mode == "eval" and args.checkpoint is not None:
+        runner = Evaluator.load(
+            args.checkpoint, args.dataset_root, args.output_dir)
 
-    assert runner is not None, f"Sorry, mode:[{args.mode}] is under development"
+    assert runner is not None, f"Mode:[{args.mode}] is undefined"
 
     runner.run()
 
