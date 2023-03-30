@@ -164,8 +164,7 @@ class Trainer(Runnable):
             inference = self._infer(batch, run_decoder=True)
             filename = f"eval-{t}-u2"
             save_image(inference, self.output_dir, filename)
-            self.writer.add_images(
-                "Eval/Images", inference.squeeze(0), time.time())
+            self.writer.add_images("Eval/Images", inference, time.time())
 
         dt = time.time()-start_at
         print(f"It took {dt:.3f} sec to evaluate")
