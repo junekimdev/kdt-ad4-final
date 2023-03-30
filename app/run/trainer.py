@@ -154,10 +154,7 @@ class Trainer(Runnable):
             # Encoder
             inference = self._infer(batch, run_decoder=False)
             filename = f"eval-{t}-u1"
-            save_clusters(inference, self.K, self.output_dir, filename)
-            inference = inference.permute(1, 0, 2, 3).repeat(1, 3, 1, 1)
-            self.writer.add_images(
-                "Eval/Images", inference, time.time(), dataformats="HCHW")
+            save_clusters(inference, self.K, self.output_dir, filename)\
 
             del inference
             gc.collect()
