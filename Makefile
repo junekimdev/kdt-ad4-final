@@ -10,4 +10,4 @@ up:
 	&& docker logs -t --tail 5 $(NAME)
 
 down:
-	docker-compose down
+	docker compose down
