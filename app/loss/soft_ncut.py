@@ -1,7 +1,7 @@
 from typing import Optional
 from torch import Tensor
 import torch.nn as nn
-from app.loss.soft_ncut_AsWali import soft_n_cut_loss
+from app.loss.soft_ncut_AsWali_copy import soft_n_cut_loss
 
 
 class SoftNCutLoss(nn.NLLLoss):
