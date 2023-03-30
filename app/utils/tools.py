@@ -1,5 +1,11 @@
 import argparse
 import sys
+import os
+import numpy as np
+from torch import Tensor
+from PIL import Image
+from app.config import Config
+config = Config()
 
 
 def arg_parse():
@@ -23,3 +29,23 @@ def arg_parse():
         sys.exit(1)
 
     return parser.parse_args()
+
+
+def save_image(inference: Tensor, output_dir: str, filename: str):
+    # change shape to h,w,3
+    img_hwc = inference.squeeze(0).permute(1, 2, 0)
+    assert img_hwc.shape[-1] == 3, "Tensor's channel is not 3"
+
+    # convert to numpy array
+    img_np = np.array(img_hwc.tolist(), dtype=np.uint8)
+    img_res = Image.fromarray(img_np)  # convert to pillow image
+
+    dname = os.path.join(output_dir, config.image_dir_name)
+    try:
+        os.makedirs(dname)
+    except FileExistsError:
+        pass
+
+    fname = os.path.join(dname, filename)
+    img_res.save(fname)
+    print(f"An image has been saved as {fname}")
