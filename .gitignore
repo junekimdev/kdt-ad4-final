@@ -9,7 +9,7 @@ open_venv*
 coverage/
 
 # Dataset
-dataset/
+*dataset/
 !*/test/dataset/
 *.pth
 
