@@ -1,48 +1,50 @@
 import time
 import os
+from contextlib import contextmanager
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from torchsummary import summary
-from PIL import Image
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.loss.soft_ncut import SoftNCutLoss
 from app.run.runner import Runnable
+from app.run.evaluator import Evaluator
 from app.config import Config, Mode
 config = Config()
 
 
 class Trainer(Runnable):
     @classmethod
-    def load(cls, checkpoint_path, dataset_root, output_dir):
-        device = torch.device("cuda") \
-            if torch.cuda.is_available() else torch.device("cpu")
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        instance = Trainer(dataset_root, output_dir)
-        instance.model.load_state_dict(checkpoint["model"])
-        instance.optimizer.load_state_dict(checkpoint["optimizer"])
-        instance.scheduler.load_state_dict(checkpoint["scheduler"])
-        instance.encoder_loss.load_state_dict(checkpoint["encoder_loss"])
-        instance.decoder_loss.load_state_dict(checkpoint["decoder_loss"])
-        instance.epoch = checkpoint["epoch"]
-        instance.iter = checkpoint["iter"]
-        instance._send_to_device()
-        return instance
+    def load(cls, checkpoint_path: str, dataset_root: str, output_dir: str):
+        self = cls(dataset_root, output_dir)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
 
-    def __init__(self, dataset_root, output_dir,
+        self.model.load_state_dict(checkpoint["model"])
+        self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.scheduler.load_state_dict(checkpoint["scheduler"])
+        self.encoder_loss.load_state_dict(checkpoint["encoder_loss"])
+        self.decoder_loss.load_state_dict(checkpoint["decoder_loss"])
+        self.epoch = checkpoint["epoch"]
+        self.iter = checkpoint["iter"]
+
+        self._send_to_device()
+        return self
+
+    def __init__(self, dataset_root: str, output_dir: str,
                  model=None, loader=None, optimizer=None, scheduler=None,
                  encoder_loss=None, decoder_loss=None, epoch=0, iter=0):
         self.epoch = epoch
         self.iter = iter
         self.device = torch.device("cuda") \
             if torch.cuda.is_available() else torch.device("cpu")
-        print(f"PyTorch uses [{self.device}]")
+        print(f"Trainer uses [{self.device}]")
 
+        self.dataset_root = dataset_root
         self.output_dir = output_dir
         self.writer = SummaryWriter(output_dir)
-        print(f"PyTorch outputs results to [{output_dir}]")
+        print(f"Trainer outputs results to [{output_dir}]")
 
         self.dataloader = MyLoader(Mode.TRAIN, dataset_root).torch() \
             if loader is None else loader
@@ -58,19 +60,19 @@ class Trainer(Runnable):
         self.decoder_loss = nn.MSELoss() if decoder_loss is None else decoder_loss
         self._send_to_device()
 
-    def _send_to_device(self):
+    def _send_to_device(self) -> None:
         self.model.to(self.device)
         self.encoder_loss.to(self.device)
         self.decoder_loss.to(self.device)
 
-    def run(self):
+    def run(self) -> None:
         summary(self.model, config.input.shape, config.batch_train)
         self.model.train()
         print("Start training...")
         while True:
             self._run_epoch()
 
-    def _run_epoch(self):
+    def _run_epoch(self) -> None:
         self.epoch += 1
         start_at = time.time()
         for batch in self.dataloader:
@@ -80,14 +82,18 @@ class Trainer(Runnable):
 
         self.scheduler.step()
         dt = time.time()-start_at
-        self.writer.add_scalar("Time/epoch", dt, self.epoch)
+        self.writer.add_scalar("Time/Epoch", dt, self.epoch)
         print(f"{self.epoch} epoch | took {dt:.3f} sec for an epoch")
 
         # Save model
         if not self.epoch % config.save_period_epoch:
+            # Save
             self._save()
+            # Run eval
+            with self._get_evaluator() as evaluator:
+                evaluator.run(print_summary=False)
 
-    def _run_iter(self, batch):
+    def _run_iter(self, batch: torch.Tensor) -> None:
         self.iter += 1
         start_at = time.time()
         img = batch  # Unpack if batch has labels
@@ -111,17 +117,16 @@ class Trainer(Runnable):
         if not self.iter % config.output_period_iter:
             dt = time.time()-start_at
             self._write_iter(encoder_loss, decoder_loss, dt)
-            print(
-                f"{self.iter} iter | took {dt:.3f} sec for {config.output_period_iter} iter")
+            print(f"{self.iter} iter | took {dt:.3f} sec for an iter")
 
-    def _write_iter(self, encoder_loss, decoder_loss, time_spent):
+    def _write_iter(self, encoder_loss: torch.Tensor, decoder_loss: torch.Tensor, time_spent: float) -> None:
         self.writer.add_scalar("Loss/Encoder", encoder_loss.item(), self.iter)
         self.writer.add_scalar("Loss/Decoder", decoder_loss.item(), self.iter)
         self.writer.add_scalar(
             "LR", self.scheduler.get_last_lr()[0], self.iter)
         self.writer.add_scalar("Time/Iter", time_spent, self.iter)
 
-    def _save(self):
+    def _save(self) -> None:
         path = os.path.join(self.output_dir, f"model_epoch{self.epoch}.pth")
         save_dict = {"model": self.model.state_dict(),
                      "optimizer": self.optimizer.state_dict(),
@@ -132,3 +137,9 @@ class Trainer(Runnable):
                      "iter": self.iter}
         torch.save(save_dict, path)
         print(f"Model has been saved after {self.epoch} epoch")
+
+    @contextmanager
+    def _get_evaluator(self):
+        self.model.eval()
+        yield Evaluator(self.dataset_root, self.output_dir, self.model)
+        self.model.train()
