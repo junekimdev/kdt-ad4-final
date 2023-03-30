@@ -61,7 +61,7 @@ def test_MyLoader_train(dataset_dir, all_txt_path_train):
     loader = instance._get_loader_for_train()
     assert isinstance(loader, DataLoader)
 
-    torch_loader = instance.get_torch_dataloader()
+    torch_loader = instance.torch()
     assert isinstance(torch_loader, DataLoader)
     assert torch_loader.batch_size == config.batch_train
 
@@ -110,7 +110,7 @@ def test_MyLoader_eval(dataset_dir, all_txt_path_eval):
     loader = instance._get_loader_for_eval()
     assert isinstance(loader, DataLoader)
 
-    torch_loader = instance.get_torch_dataloader()
+    torch_loader = instance.torch()
     assert isinstance(torch_loader, DataLoader)
     assert torch_loader.batch_size == config.batch_eval
 
@@ -164,7 +164,7 @@ def test_MyLoader_test(dataset_dir, all_txt_path_test):
     loader = instance._get_loader_for_eval()
     assert isinstance(loader, DataLoader)
 
-    torch_loader = instance.get_torch_dataloader()
+    torch_loader = instance.torch()
     assert isinstance(torch_loader, DataLoader)
     assert torch_loader.batch_size == config.batch_eval
 

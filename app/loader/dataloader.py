@@ -49,7 +49,7 @@ class MyLoader:
                           shuffle=False,
                           num_workers=multiprocessing.cpu_count())
 
-    def get_torch_dataloader(self) -> DataLoader:
+    def torch(self) -> DataLoader:
         if self.mode is Mode.TRAIN:
             return self._get_loader_for_train()
         else:

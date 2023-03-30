@@ -44,7 +44,7 @@ class Trainer(Runnable):
         self.writer = SummaryWriter(output_dir)
         print(f"PyTorch outputs results to [{output_dir}]")
 
-        self.dataloader = MyLoader(Mode.TRAIN, dataset_root) \
+        self.dataloader = MyLoader(Mode.TRAIN, dataset_root).torch() \
             if loader is None else loader
         self.model = Wnet() if model is None else model
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr_init) \
