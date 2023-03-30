@@ -29,7 +29,7 @@ class Config:
         self.image_list_txt_name = "all.txt"
         self.batch_train = 16
         self.batch_eval = 1
-        self.input = Size(3, 1208, 1920)
+        self.input = Size(3, 224, 224)
         self.output = self.input
         self.init_feature = 64
         self.K = 16
