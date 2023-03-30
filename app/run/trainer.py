@@ -66,25 +66,30 @@ class Trainer(Runnable):
     def run(self):
         summary(self.model, config.input.shape, config.batch_train)
         self.model.train()
+        print("Start training...")
         while True:
             self._run_epoch()
 
-    def _run_epoch(self, start_at=time.time()):
+    def _run_epoch(self):
         self.epoch += 1
+        start_at = time.time()
         for batch in self.dataloader:
             if batch is None:  # Invalid batch
                 continue
             self._run_iter(batch)
 
         self.scheduler.step()
-        self.writer.add_scalar("Time/epoch", time.time()-start_at, self.epoch)
+        dt = time.time()-start_at
+        self.writer.add_scalar("Time/epoch", dt, self.epoch)
+        print(f"{self.epoch} epoch | took {dt:.3f} sec for an epoch")
 
+        # Save model
         if not self.epoch % config.save_period_epoch:
             self._save()
-            print(f"{self.epoch} epochs are done")
 
-    def _run_iter(self, batch, start_at=time.time()):
+    def _run_iter(self, batch):
         self.iter += 1
+        start_at = time.time()
         img = batch  # Unpack if batch has labels
         img = img.to(self.device)
 
@@ -104,8 +109,10 @@ class Trainer(Runnable):
 
         # Output
         if not self.iter % config.output_period_iter:
-            self._write_iter(encoder_loss, decoder_loss, time.time()-start_at)
-            print(f"{self.iter} iterations are done")
+            dt = time.time()-start_at
+            self._write_iter(encoder_loss, decoder_loss, dt)
+            print(
+                f"{self.iter} iter | took {dt:.3f} sec for {config.output_period_iter} iter")
 
     def _write_iter(self, encoder_loss, decoder_loss, time_spent):
         self.writer.add_scalar("Loss/Encoder", encoder_loss.item(), self.iter)
@@ -124,3 +131,4 @@ class Trainer(Runnable):
                      "epoch": self.epoch,
                      "iter": self.iter}
         torch.save(save_dict, path)
+        print(f"Model has been saved after {self.epoch} epoch")
