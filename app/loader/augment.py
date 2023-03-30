@@ -20,7 +20,6 @@ class MyTransform:
                 A.RandomFog(),
                 A.RandomSunFlare(),
                 A.RandomSnow(),
-                A.RandomContrast(),
                 A.RandomBrightnessContrast(),
             ], p=.2),
             A.GaussianBlur(p=.7),
