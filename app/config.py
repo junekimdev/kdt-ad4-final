@@ -32,7 +32,7 @@ class Config:
         self.input = Size(3, 224, 224)
         self.output = self.input
         self.init_feature = 64
-        self.K = 16
+        self.K = 4
         self.conv_kernel = 3
         self.conv_stride = 1
         self.conv_padding = self._get_padding(self.conv_kernel)
