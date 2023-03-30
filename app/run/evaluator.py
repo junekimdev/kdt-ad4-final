@@ -71,5 +71,6 @@ class Evaluator(Runnable):
     def _infer(self, batch: torch.Tensor, run_decoder=True) -> torch.Tensor:
         img = batch  # Unpack if batch has labels
         img = img.to(self.device)
-        inference = self.model(img, run_decoder=run_decoder)
+        with torch.no_grad():
+            inference = self.model(img, run_decoder=run_decoder)
         return inference

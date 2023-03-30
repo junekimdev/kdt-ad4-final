@@ -91,7 +91,8 @@ class Trainer(Runnable):
             self._save()
             # Run eval
             self.model.eval()
-            self._run_eval()
+            with torch.no_grad():
+                self._run_eval()
             self.model.train()
 
     def _run_iter(self, batch: torch.Tensor) -> None:
