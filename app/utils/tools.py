@@ -15,10 +15,10 @@ def arg_parse():
         "--mode", type=str, dest="mode", default="train",
         help="one of [train | eval | test | onnx]")
     parser.add_argument(
-        "-d", "--dataset", type=str, dest="dataset_root", default="dataset",
+        "-d", "--dataset", type=str, dest="dataset_root", default="./dataset",
         help="give dataset root directory (input)")
     parser.add_argument(
-        "-o", "--out", type=str, dest="output_dir", default="output",
+        "-o", "--out", type=str, dest="output_dir", default="./output",
         help="set output directory")
     parser.add_argument(
         "-c", "--checkpoint", type=str, dest="checkpoint",
