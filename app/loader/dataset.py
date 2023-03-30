@@ -23,7 +23,7 @@ class DatasetAugPil(Dataset):
             image_np = np.array(image)
         # Apply transformations
         augmented = self.transform(image=image_np)
-        return augmented['image']
+        return augmented['image'].float()
 
 
 class DatasetAugPilLabel(Dataset):
@@ -46,4 +46,4 @@ class DatasetAugPilLabel(Dataset):
             image_np = np.array(image)
         # Apply transformations
         augmented = self.transform(image=image_np)
-        return augmented['image'], label
+        return augmented['image'].float(), label
