@@ -6,7 +6,7 @@ from app.utils import tools
 TEST_BATCH = 1
 TEST_CHAN = 3
 TEST_SIZE = 224
-TEST_NAME = "test_image"
+TEST_NAME = "test_image.jpg"
 
 
 @pytest.fixture
