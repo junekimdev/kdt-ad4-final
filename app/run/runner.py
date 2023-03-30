@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class Runnable(ABC):
     @abstractmethod
-    def run(self):
+    def run(self) -> None:
         pass
