@@ -81,6 +81,7 @@ class Trainer(Runnable):
 
         if not self.epoch % config.save_period_epoch:
             self._save()
+            print(f"{self.epoch} epochs are done")
 
     def _run_iter(self, batch, start_at=time.time()):
         self.iter += 1
@@ -104,6 +105,7 @@ class Trainer(Runnable):
         # Output
         if not self.iter % config.output_period_iter:
             self._write_iter(encoder_loss, decoder_loss, time.time()-start_at)
+            print(f"{self.iter} iterations are done")
 
     def _write_iter(self, encoder_loss, decoder_loss, time_spent):
         self.writer.add_scalar("Loss/Encoder", encoder_loss.item(), self.iter)
