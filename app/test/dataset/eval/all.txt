@@ -1,3 +1,0 @@
-c:\Users\June\Dev\Autonomous\kdt_ad4_archive\PROJ_7_final\app\test\dataset\eval\images\placekitten_640x360_0.jpg
-c:\Users\June\Dev\Autonomous\kdt_ad4_archive\PROJ_7_final\app\test\dataset\eval\images\placekitten_640x360_1.jpg
-c:\Users\June\Dev\Autonomous\kdt_ad4_archive\PROJ_7_final\app\test\dataset\eval\images\placekitten_640x360_2.jpg
