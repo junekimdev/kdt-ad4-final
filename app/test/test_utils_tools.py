@@ -1,26 +1,17 @@
 import pytest
 import os
 import torch
-from app.run import evaluator
+from app.utils import tools
 
 TEST_BATCH = 1
 TEST_CHAN = 3
 TEST_SIZE = 224
-
-
-@pytest.fixture
-def dataset_root():
-    return os.path.join(os.path.dirname(__file__), "dataset")
+TEST_NAME = "test_image"
 
 
 @pytest.fixture
 def output_dir():
     return os.path.join(os.path.dirname(__file__), "output")
-
-
-@pytest.fixture
-def Evaluator(dataset_root, output_dir):
-    return evaluator.Evaluator(dataset_root, output_dir)
 
 
 @pytest.fixture
@@ -30,9 +21,9 @@ def input_tensor():
     return tensor
 
 
-def test_save_image(Evaluator, input_tensor, output_dir):
+def test_save_image(input_tensor, output_dir):
     try:
-        Evaluator._save_image(input_tensor)
+        tools.save_image(input_tensor, output_dir, TEST_NAME)
     except Exception as e:
         pytest.fail(str(e))
     else:
