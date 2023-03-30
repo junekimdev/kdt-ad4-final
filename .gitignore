@@ -7,7 +7,9 @@ open_venv*
 
 # testing
 coverage/
-.coverage
+htmlcov/
+.coverage*
+coverage.*
 
 # Dataset
 *dataset/

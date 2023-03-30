@@ -1,3 +1,15 @@
 [run]
+branch = True
 source = app
-omit = app/test/*
+omit = 
+  app/test/*
+  *_copy.*
+  *__init__*
+
+[report] 
+skip_empty = True
+exclude_lines = 
+  if __name__ == .__main__.:
+
+[html]
+directory = coverage
