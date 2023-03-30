@@ -50,7 +50,7 @@ class Trainer(Runnable):
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr_init) \
             if optimizer is None else optimizer
         self.scheduler = optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=config.lr_decay_epoch, gamma=config.lr_decay_amount) \
+            self.optimizer, step_size=config.lr_decay_epoch, gamma=config.lr_decay_ratio) \
             if scheduler is None else scheduler
         # SoftNCutLoss derived from Negative Log Likelihood(NLL) Loss
         self.encoder_loss = SoftNCutLoss() if encoder_loss is None else encoder_loss

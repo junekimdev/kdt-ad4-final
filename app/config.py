@@ -44,7 +44,7 @@ class Config:
         self.upsample_stride = 2
         self.lr_init = 0.05
         self.lr_decay_epoch = 100
-        self.lr_decay_amount = 0.5
+        self.lr_decay_ratio = 0.5
         self.output_period_iter = 100
         self.save_period_epoch = 50
 
