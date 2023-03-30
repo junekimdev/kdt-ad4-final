@@ -6,7 +6,7 @@ def arg_parse():
     parser = argparse.ArgumentParser(
         description="Deep Learning Image Segmentation with [W-NET]")
     parser.add_argument(
-        "-m", "--mode", type=str, dest="mode", default="train",
+        "--mode", type=str, dest="mode", default="train",
         help="one of [train | eval | test | onnx]")
     parser.add_argument(
         "-d", "--dataset", type=str, dest="dataset_root", default="dataset",
