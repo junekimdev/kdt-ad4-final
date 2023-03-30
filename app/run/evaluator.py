@@ -3,11 +3,10 @@ import os
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from torchsummary import summary
-import numpy as np
-from PIL import Image
 from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.run.runner import Runnable
+from app.utils.tools import save_image
 from app.config import Config, Mode
 config = Config()
 
@@ -30,11 +29,12 @@ class Evaluator(Runnable):
             if torch.cuda.is_available() else torch.device("cpu")
         print(f"Evaluator uses [{self.device}]")
 
-        self.output_dir = output_dir
-        self.writer = SummaryWriter(output_dir)
-        print(f"Evaluator outputs results to [{output_dir}]")
+        self.dataset_root = os.path.abspath(dataset_root)
+        self.output_dir = os.path.abspath(output_dir)
+        self.writer = SummaryWriter(self.output_dir)
+        print(f"Evaluator outputs results to [{self.output_dir}]")
 
-        self.dataloader = MyLoader(Mode.EVAL, dataset_root).torch() \
+        self.dataloader = MyLoader(Mode.EVAL, self.dataset_root).torch() \
             if loader is None else loader
         self.model = Wnet() if model is None else model
 
@@ -45,63 +45,30 @@ class Evaluator(Runnable):
 
     def run(self) -> None:
         self.model.eval()
-        print("Start evaluating...")
-
-        start_at = time.time()
-        for batch in self.dataloader:
-            if batch is None:  # Invalid batch
-                continue
-            inference = self._run_iter(batch)
-            self._save_image(inference)
-
-        dt = time.time()-start_at
-        print(f"It took {dt:.3f} sec to evaluate")
-
-    def eval(self):
         summary(self.model, config.input.shape, config.batch_eval)
         print("Start evaluating...")
 
         start_at = time.time()
-        infers = []
         for batch in self.dataloader:
             if batch is None:  # Invalid batch
                 continue
-            inference = self._run_iter(batch)
-            self._save_image(inference)
-            infers.append(inference)
 
-        # Output to tensorboard
-        stacked_infers = torch.stack(infers)
-        self._write_on_board(stacked_infers)
+            t = time.time()
+            # Encoder
+            inference = self._infer(batch, run_decoder=False)
+            filename = f"eval-{t}-1.jpg"
+            save_image(inference, self.output_dir, filename)
+
+            # Encoder+Decoder
+            inference = self._infer(batch, run_decoder=True)
+            filename = f"eval-{t}-2.jpg"
+            save_image(inference, self.output_dir, filename)
 
         dt = time.time()-start_at
         print(f"It took {dt:.3f} sec to evaluate")
 
-    def _write_on_board(self, batch_infers: torch.Tensor):
-        self.writer.add_images("Eval/Images", batch_infers,
-                               Evaluator.global_image_id)
-        Evaluator.global_image_id = + 1
-
-    def _run_iter(self, batch: torch.Tensor) -> torch.Tensor:
+    def _infer(self, batch: torch.Tensor, run_decoder=True) -> torch.Tensor:
         img = batch  # Unpack if batch has labels
         img = img.to(self.device)
-        inference = self.model(img, run_decoder=True)
+        inference = self.model(img, run_decoder=run_decoder)
         return inference
-
-    def _save_image(self, inference: torch.Tensor):
-        # change shape to h,w,3
-        img_hwc = inference.squeeze(0).permute(1, 2, 0)
-        assert img_hwc.shape[-1] == 3, "Tensor's channel is not 3"
-
-        # convert to numpy array
-        img_np = np.array(img_hwc.tolist(), dtype=np.uint8)
-        img_res = Image.fromarray(img_np)  # convert to pillow image
-
-        dname = os.path.join(self.output_dir, "images")
-        try:
-            os.makedirs(dname)
-        except FileExistsError:
-            pass
-        fname = os.path.join(dname, f"eval-{time.time()}.jpg")
-        img_res.save(fname)
-        print(f"An image has been saved as {fname}")

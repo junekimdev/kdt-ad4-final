@@ -1,6 +1,5 @@
 import time
 import os
-from contextlib import contextmanager
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,7 +9,7 @@ from app.model.wnet import Wnet
 from app.loader.dataloader import MyLoader
 from app.loss.soft_ncut import SoftNCutLoss
 from app.run.runner import Runnable
-from app.run.evaluator import Evaluator
+from app.utils.tools import save_image
 from app.config import Config, Mode
 config = Config()
 
@@ -41,12 +40,12 @@ class Trainer(Runnable):
             if torch.cuda.is_available() else torch.device("cpu")
         print(f"Trainer uses [{self.device}]")
 
-        self.dataset_root = dataset_root
-        self.output_dir = output_dir
-        self.writer = SummaryWriter(output_dir)
-        print(f"Trainer outputs results to [{output_dir}]")
+        self.dataset_root = os.path.abspath(dataset_root)
+        self.output_dir = os.path.abspath(output_dir)
+        self.writer = SummaryWriter(self.output_dir)
+        print(f"Trainer outputs results to [{self.output_dir}]")
 
-        self.dataloader = MyLoader(Mode.TRAIN, dataset_root).torch() \
+        self.dataloader = MyLoader(Mode.TRAIN, self.dataset_root).torch() \
             if loader is None else loader
         self.model = Wnet() if model is None else model
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr_init) \
@@ -90,8 +89,9 @@ class Trainer(Runnable):
             # Save
             self._save()
             # Run eval
-            with self._get_evaluator() as evaluator:
-                evaluator.eval()
+            self.model.eval()
+            self._run_eval()
+            self.model.train()
 
     def _run_iter(self, batch: torch.Tensor) -> None:
         self.iter += 1
@@ -138,8 +138,38 @@ class Trainer(Runnable):
         torch.save(save_dict, path)
         print(f"Model has been saved after {self.epoch} epoch")
 
-    @contextmanager
-    def _get_evaluator(self):
-        self.model.eval()
-        yield Evaluator(self.dataset_root, self.output_dir, self.model)
-        self.model.train()
+    def _run_eval(self):
+        print("Start evaluating...")
+
+        start_at = time.time()
+        dataloader = MyLoader(Mode.EVAL, self.dataset_root).torch()
+        infers = []
+        for batch in dataloader:
+            if batch is None:  # Invalid batch
+                continue
+
+            t = time.time()
+            # Encoder
+            inference = self._infer(batch, run_decoder=False)
+            filename = f"eval-{t}-1.jpg"
+            save_image(inference, self.output_dir, filename)
+            infers.append(inference)
+
+            # Encoder+Decoder
+            inference = self._infer(batch, run_decoder=True)
+            filename = f"eval-{t}-2.jpg"
+            save_image(inference, self.output_dir, filename)
+            infers.append(inference)
+
+        # Output to tensorboard
+        stacked_infers = torch.stack(infers)
+        self.writer.add_images("Eval/Images", stacked_infers, self.epoch)
+
+        dt = time.time()-start_at
+        print(f"It took {dt:.3f} sec to evaluate")
+
+    def _infer(self, batch: torch.Tensor, run_decoder=True) -> torch.Tensor:
+        img = batch  # Unpack if batch has labels
+        img = img.to(self.device)
+        inference = self.model(img, run_decoder=run_decoder)
+        return inference
