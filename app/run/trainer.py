@@ -110,7 +110,8 @@ class Trainer(Runnable):
     def _write_iter(self, encoder_loss, decoder_loss, time_spent):
         self.writer.add_scalar("Loss/Encoder", encoder_loss.item(), self.iter)
         self.writer.add_scalar("Loss/Decoder", decoder_loss.item(), self.iter)
-        self.writer.add_scalar("LR", self.scheduler.get_last_lr(), self.iter)
+        self.writer.add_scalar(
+            "LR", self.scheduler.get_last_lr()[0], self.iter)
         self.writer.add_scalar("Time/Iter", time_spent, self.iter)
 
     def _save(self):
