@@ -43,10 +43,22 @@ class Evaluator(Runnable):
     def _send_to_device(self):
         self.model.to(self.device)
 
-    def run(self, *, print_summary=True, save_as_image=True, write_on_board=True) -> None:
-        if print_summary:
-            summary(self.model, config.input.shape, config.batch_eval)
+    def run(self) -> None:
         self.model.eval()
+        print("Start evaluating...")
+
+        start_at = time.time()
+        for batch in self.dataloader:
+            if batch is None:  # Invalid batch
+                continue
+            inference = self._run_iter(batch)
+            self._save_image(inference)
+
+        dt = time.time()-start_at
+        print(f"It took {dt:.3f} sec to evaluate")
+
+    def eval(self):
+        summary(self.model, config.input.shape, config.batch_eval)
         print("Start evaluating...")
 
         start_at = time.time()
@@ -54,16 +66,13 @@ class Evaluator(Runnable):
         for batch in self.dataloader:
             if batch is None:  # Invalid batch
                 continue
-            inference = self._run_iter(batch, write_on_board)
-            if save_as_image:
-                self._save_image(inference)
-            if write_on_board:
-                infers.append(inference)
+            inference = self._run_iter(batch)
+            self._save_image(inference)
+            infers.append(inference)
 
         # Output to tensorboard
-        if write_on_board:
-            batch_infers = torch.stack(infers)
-            self._write_on_board(batch_infers)
+        stacked_infers = torch.stack(infers)
+        self._write_on_board(stacked_infers)
 
         dt = time.time()-start_at
         print(f"It took {dt:.3f} sec to evaluate")

@@ -91,7 +91,7 @@ class Trainer(Runnable):
             self._save()
             # Run eval
             with self._get_evaluator() as evaluator:
-                evaluator.run(print_summary=False)
+                evaluator.eval()
 
     def _run_iter(self, batch: torch.Tensor) -> None:
         self.iter += 1
