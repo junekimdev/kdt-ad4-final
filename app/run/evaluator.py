@@ -43,7 +43,7 @@ class Evaluator(Runnable):
     def _send_to_device(self):
         self.model.to(self.device)
 
-    def run(self, *, print_summary=True, save_as_image=True, tensor_out=True) -> None:
+    def run(self, *, print_summary=True, save_as_image=True, write_on_board=True) -> None:
         if print_summary:
             summary(self.model, config.input.shape, config.batch_eval)
         self.model.eval()
@@ -54,30 +54,30 @@ class Evaluator(Runnable):
         for batch in self.dataloader:
             if batch is None:  # Invalid batch
                 continue
-            inference = self._run_iter(batch, tensor_out)
+            inference = self._run_iter(batch, write_on_board)
             if save_as_image:
                 self._save_image(inference)
-            if tensor_out:
+            if write_on_board:
                 infers.append(inference)
 
         # Output to tensorboard
-        if tensor_out:
+        if write_on_board:
             batch_infers = torch.stack(infers)
-            self._write_iter(batch_infers)
+            self._write_on_board(batch_infers)
 
         dt = time.time()-start_at
         print(f"It took {dt:.3f} sec to evaluate")
+
+    def _write_on_board(self, batch_infers: torch.Tensor):
+        self.writer.add_images("Eval/Images", batch_infers,
+                               Evaluator.global_image_id)
+        Evaluator.global_image_id = + 1
 
     def _run_iter(self, batch: torch.Tensor) -> torch.Tensor:
         img = batch  # Unpack if batch has labels
         img = img.to(self.device)
         inference = self.model(img, run_decoder=True)
         return inference
-
-    def _write_iter(self, batch_infers: torch.Tensor):
-        self.writer.add_images("Eval/Images", batch_infers,
-                               Evaluator.global_image_id)
-        Evaluator.global_image_id = + 1
 
     def _save_image(self, inference: torch.Tensor):
         # change shape to h,w,3
