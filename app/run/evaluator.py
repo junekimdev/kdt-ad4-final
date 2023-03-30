@@ -102,7 +102,6 @@ class Evaluator(Runnable):
             os.makedirs(dname)
         except FileExistsError:
             pass
-        t = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        fname = os.path.join(dname, f"eval-{t}.jpg")
+        fname = os.path.join(dname, f"eval-{time.time()}.jpg")
         img_res.save(fname)
         print(f"An image has been saved as {fname}")
