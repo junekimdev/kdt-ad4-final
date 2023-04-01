@@ -4,7 +4,6 @@ source = app
 omit = 
   app/test/*
   *_copy.*
-  *__init__*
 
 [report] 
 skip_empty = True
